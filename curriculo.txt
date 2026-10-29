@@ -1,0 +1,54 @@
+============================================
+CURRÍCULO — Mateus Lemos do Nascimento
+============================================
+
+DADOS PESSOAIS
+Nome: Mateus Lemos do Nascimento
+Localização: Brasil
+Disponibilidade: Imediata
+
+--------------------------------------------
+OBJETIVO PROFISSIONAL
+--------------------------------------------
+Desenvolvedor Full Stack / Back-end & Automação de Dados.
+Busco oportunidades de Estágio ou posições Júnior nas áreas de
+Desenvolvimento Back-end, Full Stack, Automação de Processos ou
+Suporte de Infraestrutura / DevOps.
+
+--------------------------------------------
+FORMAÇÃO ACADÊMICA
+--------------------------------------------
+• Engenharia de Software — UNICID (Graduando)
+• Técnico em Desenvolvimento de Software — FAT (Concluído)
+
+--------------------------------------------
+STACK TECNOLÓGICA
+--------------------------------------------
+Linguagens:      Java, C#, Python, JavaScript, TypeScript
+Frameworks:      .NET, Node.js, React
+Automação:       Pipelines com Python e Java, Web Scraping
+Infraestrutura:  Active Directory, SAP, ITSM/HALO
+Banco de Dados:  SQL (geral)
+Ferramentas:     Git, Docker (noções), Linux (noções)
+
+--------------------------------------------
+EXPERIÊNCIA PROFISSIONAL
+--------------------------------------------
+• Suporte Técnico N1 / Service Desk
+  - Atendimento e resolução de chamados via ITSM/HALO
+  - Gestão de contas e permissões no Active Directory
+  - Suporte a sistemas SAP (módulos básicos)
+  - Documentação de procedimentos técnicos
+
+• Automação de Processos
+  - Desenvolvimento de pipelines de dados com Python e Java
+  - Automação de tarefas repetitivas e integração entre sistemas
+  - Scripts de coleta e transformação de dados
+
+--------------------------------------------
+COMPETÊNCIAS COMPLEMENTARES
+--------------------------------------------
+• Comunicação técnica e documentação
+• Resolução de problemas e troubleshooting
+• Trabalho em equipe e metodologias ágeis
+• Aprendizado contínuo e adaptabilidade

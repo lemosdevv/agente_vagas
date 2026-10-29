@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Relatório de Vagas do Dia</title>
+</head>
+<body style="font-family: Arial, sans-serif; max-width: 750px; margin: auto; padding: 20px; color: #202124; background-color: #f8f9fa;">
+    <div style="background-color: #ffffff; padding: 26px; border-radius: 10px; border: 1px solid #dadce0;">
+        <h1 style="color: #202124; border-bottom: 2px solid #1a73e8; padding-bottom: 12px; margin-top: 0; font-size: 24px;">
+            🤖 Agente de Vagas — Varredura do Dia
+        </h1>
+        <p style="color: #5f6368; font-size: 15px; line-height: 1.5;">
+            Olá, Mateus! O agente varreu os portais de emprego buscando <strong>exclusivamente oportunidades publicadas nas últimas 24 horas</strong>.
+        </p>
+        <p style="color: #137333; font-size: 15px; font-weight: bold; margin-bottom: 24px;">
+            Foram encontradas {total_vagas} vaga(s) compatíveis com seu perfil hoje:
+        </p>
+
+        {cards_html}
+
+        <hr style="border: none; border-top: 1px solid #dadce0; margin: 30px 0 16px 0;">
+        <p style="color: #9aa0a6; font-size: 12px; line-height: 1.4; text-align: center;">
+            Gerado automaticamente pelo Agente Autônomo de Vagas v1.0<br>
+            Filtro: Publicadas Hoje | Triagem Gemini 2.0 Flash | Notificação Gmail SSL
+        </p>
+    </div>
+</body>
+</html>
