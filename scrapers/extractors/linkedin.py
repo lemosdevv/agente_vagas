@@ -6,104 +6,161 @@
 
 from __future__ import annotations
 
-import re
-from urllib.parse import urlparse, parse_qs, urlencode
+from urllib.parse import parse_qs, urlencode, urlparse
+
 from playwright.async_api import Page
+
 from .base import BaseExtractor
 
 
 class LinkedInExtractor(BaseExtractor):
     """Extrator especializado em páginas de vagas do LinkedIn."""
 
-    async def extrair(self, page: Page) -> str | None:
-        partes: list[str] = []
+    async def _buscar_texto(
+        self,
+        page: Page,
+        seletores: list[str],
+        timeout: int = 800,
+    ) -> str | None:
+        """Retorna o texto do primeiro seletor visível."""
 
-        # Título
-        for sel in [
-            "h1.top-card-layout__title",
-            "h1.t-24",
-            ".job-details-jobs-unified-top-card__job-title h1",
-            "h1",
-        ]:
+        for seletor in seletores:
             try:
-                el = page.locator(sel).first
-                if await el.is_visible(timeout=1000):
-                    partes.append(f"TÍTULO: {(await el.inner_text()).strip()}")
-                    break
-            except Exception:
-                pass
+                elemento = page.locator(seletor).first
 
-        # Empresa
-        for sel in [
-            ".topcard__org-name-link",
-            "a.topcard__org-name-link",
-            ".job-details-jobs-unified-top-card__company-name a",
-            "a[data-tracking-control-name*='company']",
-        ]:
-            try:
-                el = page.locator(sel).first
-                if await el.is_visible(timeout=800):
-                    partes.append(f"EMPRESA: {(await el.inner_text()).strip()}")
-                    break
-            except Exception:
-                pass
+                if await elemento.is_visible(timeout=timeout):
+                    texto = (await elemento.inner_text()).strip()
 
-        # Localização
-        for sel in [
-            ".topcard__flavor--bullet",
-            ".job-details-jobs-unified-top-card__bullet",
-        ]:
-            try:
-                el = page.locator(sel).first
-                if await el.is_visible(timeout=800):
-                    partes.append(f"LOCAL: {(await el.inner_text()).strip()}")
-                    break
-            except Exception:
-                pass
+                    if texto:
+                        return texto
 
-        # Data de Publicação / Tempo decorrido (CRÍTICO para filtro 24h)
-        for sel in [
+            except Exception:
+                continue
+
+        return None
+
+    async def _extrair_titulo(self, page: Page) -> str | None:
+        return await self._buscar_texto(
+            page,
+            [
+                "h1.top-card-layout__title",
+                "h1.t-24",
+                ".job-details-jobs-unified-top-card__job-title h1",
+                "h1",
+            ],
+            timeout=1000,
+        )
+
+    async def _extrair_empresa(self, page: Page) -> str | None:
+        return await self._buscar_texto(
+            page,
+            [
+                ".topcard__org-name-link",
+                "a.topcard__org-name-link",
+                ".job-details-jobs-unified-top-card__company-name a",
+                "a[data-tracking-control-name*='company']",
+            ],
+        )
+
+    async def _extrair_localizacao(self, page: Page) -> str | None:
+        return await self._buscar_texto(
+            page,
+            [
+                ".topcard__flavor--bullet",
+                ".job-details-jobs-unified-top-card__bullet",
+            ],
+        )
+
+    async def _extrair_publicacao(self, page: Page) -> str | None:
+        seletores = [
             ".posted-time-ago__text",
-            ".job-details-jobs-unified-top-card__primary-description-container span",
+            (
+                ".job-details-jobs-unified-top-card__"
+                "primary-description-container span"
+            ),
             'span:has-text("há")',
             'span:has-text("ago")',
             "time",
-        ]:
-            try:
-                el = page.locator(sel).first
-                if await el.is_visible(timeout=800):
-                    txt = (await el.inner_text()).strip()
-                    if any(x in txt.lower() for x in ["há", "ago", "hora", "minut", "dia", "day", "week", "mês"]):
-                        partes.append(f"PUBLICADA: {txt}")
-                        break
-            except Exception:
-                pass
+        ]
 
-        # Abrir texto completo da descrição
+        termos_validos = [
+            "há",
+            "ago",
+            "hora",
+            "hour",
+            "minut",
+            "dia",
+            "day",
+            "week",
+            "semana",
+            "mês",
+            "month",
+        ]
+
+        for seletor in seletores:
+            texto = await self._buscar_texto(
+                page,
+                [seletor],
+            )
+
+            if texto and any(
+                termo in texto.lower()
+                for termo in termos_validos
+            ):
+                return texto
+
+        return None
+
+    async def _abrir_descricao_completa(self, page: Page) -> None:
+        seletor = (
+            'button.show-more-less-html__button--more, '
+            'button:has-text("ver mais"), '
+            'button:has-text("Show more")'
+        )
+
         try:
-            show_more = page.locator(
-                'button.show-more-less-html__button--more, button:has-text("ver mais"), button:has-text("Show more")'
-            ).first
-            if await show_more.is_visible(timeout=1000):
-                await show_more.click()
+            botao = page.locator(seletor).first
+
+            if await botao.is_visible(timeout=1000):
+                await botao.click()
                 await page.wait_for_timeout(400)
+
         except Exception:
             pass
 
-        for sel in [
-            ".show-more-less-html__markup",
-            ".description__text",
-            ".jobs-description__content",
-            "article.jobs-description",
-            "section.description",
-        ]:
-            try:
-                el = page.locator(sel).first
-                if await el.is_visible(timeout=1500):
-                    partes.append(f"DESCRIÇÃO:\n{(await el.inner_text()).strip()}")
-                    break
-            except Exception:
-                pass
+    async def _extrair_descricao(self, page: Page) -> str | None:
+        await self._abrir_descricao_completa(page)
+
+        return await self._buscar_texto(
+            page,
+            [
+                ".show-more-less-html__markup",
+                ".description__text",
+                ".jobs-description__content",
+                "article.jobs-description",
+                "section.description",
+            ],
+            timeout=1500,
+        )
+
+    async def extrair(self, page: Page) -> str | None:
+        """Extrai e organiza as informações da vaga."""
+
+        dados = [
+            ("TÍTULO", await self._extrair_titulo(page)),
+            ("EMPRESA", await self._extrair_empresa(page)),
+            ("LOCAL", await self._extrair_localizacao(page)),
+            ("PUBLICADA", await self._extrair_publicacao(page)),
+            ("DESCRIÇÃO", await self._extrair_descricao(page)),
+        ]
+
+        partes = [
+            f"{campo}:\n{valor}"
+            if campo == "DESCRIÇÃO"
+            else f"{campo}: {valor}"
+            for campo, valor in dados
+            if valor
+        ]
 
         return "\n\n".join(partes) if partes else None
 
@@ -111,23 +168,32 @@ class LinkedInExtractor(BaseExtractor):
 def normalizar_url_linkedin(url: str) -> tuple[str, list[str]]:
     """
     Normaliza a URL do LinkedIn para o formato público de busca e
-    FORÇA o filtro de data para as ÚLTIMAS 24 HORAS (f_TPR=r86400).
+    força o filtro de data para as últimas 24 horas (f_TPR=r86400).
     """
+
     ids_iniciais: list[str] = []
+
     parsed = urlparse(url)
     qs = parse_qs(parsed.query)
 
     if "currentJobId" in qs:
-        for jid in qs["currentJobId"]:
-            if jid.isdigit():
-                ids_iniciais.append(f"https://www.linkedin.com/jobs/view/{jid}/")
+        for job_id in qs["currentJobId"]:
+            if job_id.isdigit():
+                ids_iniciais.append(
+                    f"https://www.linkedin.com/jobs/view/{job_id}/"
+                )
 
-    new_path = parsed.path
-    if "search-results" in new_path:
-        new_path = "/jobs/search/"
+    novo_caminho = parsed.path
+
+    if "search-results" in novo_caminho:
+        novo_caminho = "/jobs/search/"
 
     # Regra de negócio: últimas 24 horas garantidas
     qs["f_TPR"] = ["r86400"]
 
-    clean_url = f"{parsed.scheme}://{parsed.netloc}{new_path}?{urlencode(qs, doseq=True)}"
+    clean_url = (
+        f"{parsed.scheme}://{parsed.netloc}"
+        f"{novo_caminho}?{urlencode(qs, doseq=True)}"
+    )
+
     return clean_url, ids_iniciais
