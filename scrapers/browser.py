@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import logging
 from contextlib import asynccontextmanager
+from multiprocessing import context
 from typing import AsyncGenerator
 from playwright.async_api import (
     async_playwright,
@@ -17,7 +18,6 @@ from playwright.async_api import (
 )
 
 from config.settings import (
-    STATE_FILE,
     USER_AGENT,
     PAGE_LOAD_TIMEOUT_MS,
 )
@@ -31,7 +31,6 @@ async def criar_contexto_navegador() -> AsyncGenerator[BrowserContext, None]:
     Cria e configura uma instância isolada do Chromium com:
       - Modo Stealth antifingerprint
       - Headers reais de usuário
-      - Injeção de sessão autenticada (state.json) se existir
     """
     async with async_playwright() as pw:
         browser: Browser = await pw.chromium.launch(
@@ -58,13 +57,8 @@ async def criar_contexto_navegador() -> AsyncGenerator[BrowserContext, None]:
             },
         }
 
-        if STATE_FILE.exists():
-            log.info("🔑 Sessão salva (%s) carregada com sucesso!", STATE_FILE.name)
-            context_kwargs["storage_state"] = str(STATE_FILE)
-
         context: BrowserContext = await browser.new_context(**context_kwargs)
 
-        # Mascarar webdriver contra detecção de bot
         await context.add_init_script("""
             Object.defineProperty(navigator, 'webdriver', {
                 get: () => undefined
