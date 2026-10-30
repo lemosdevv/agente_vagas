@@ -194,6 +194,6 @@ Defina a licença do projeto antes de publicar. Para um projeto pessoal, MIT é 
 
 ```text
 MIT License
-Copyright (c) SEU_NOME
+Copyright (c) Mateus Lemos do Nascimento
 ```
 
