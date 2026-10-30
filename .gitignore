@@ -37,6 +37,8 @@ venv.bak/
 # Environment variables & secrets (CRÍTICO: nunca versionar senhas!)
 .env
 state.json
+vagas_enviadas.json
+curriculo.txt
 
 # Screenshots & Debug outputs
 screenshots/

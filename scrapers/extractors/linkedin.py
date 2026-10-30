@@ -168,7 +168,7 @@ class LinkedInExtractor(BaseExtractor):
 def normalizar_url_linkedin(url: str) -> tuple[str, list[str]]:
     """
     Normaliza a URL do LinkedIn para o formato público de busca e
-    força o filtro de data para as últimas 24 horas (f_TPR=r86400).
+    força o filtro de data para os últimos 7 dias (f_TPR=r604800).
     """
 
     ids_iniciais: list[str] = []
@@ -188,8 +188,8 @@ def normalizar_url_linkedin(url: str) -> tuple[str, list[str]]:
     if "search-results" in novo_caminho:
         novo_caminho = "/jobs/search/"
 
-    # Regra de negócio: últimas 24 horas garantidas
-    qs["f_TPR"] = ["r86400"]
+    # Regra de negócio: últimos 7 dias garantidos
+    qs["f_TPR"] = ["r604800"]
 
     clean_url = (
         f"{parsed.scheme}://{parsed.netloc}"

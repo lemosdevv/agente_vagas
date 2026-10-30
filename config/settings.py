@@ -21,6 +21,7 @@ SCREENSHOTS_DIR: Final[Path] = BASE_DIR / "screenshots"
 SCREENSHOTS_DIR.mkdir(exist_ok=True)
 
 STATE_FILE: Final[Path] = BASE_DIR / "state.json"
+ENVIADAS_FILE: Final[Path] = BASE_DIR / "vagas_enviadas.json"
 CURRICULO_FILE: Final[Path] = BASE_DIR / "curriculo.txt"
 URLS_FILE: Final[Path] = BASE_DIR / "urls_alvo.txt"
 ENV_FILE: Final[Path] = BASE_DIR / ".env"

@@ -50,6 +50,40 @@ def detectar_portal(url: str) -> str:
     return PORTAL_GENERICO
 
 
+def _url_obviamente_incompativel(url: str) -> bool:
+    """Elimina links que claramente não representam vagas de tecnologia."""
+    texto = urlparse(url).path.lower()
+    termos = (
+        "restaurantemc",
+        "atendente-de-restaurante",
+        "atendente-de-lanchonete",
+        "operador-de-caixa",
+        "garcom",
+        "garcon",
+        "cozinheiro",
+        "auxiliar-de-cozinha",
+        "promotor-de-vendas",
+        "consultor-de-vendas",
+        "vendedor",
+        "recepcionista",
+        "motorista",
+        "pagamento-candidato",
+        "por-area",
+        "por-local",
+    )
+    return any(termo in texto for termo in termos)
+
+
+def _normalizar_url_indeed(href: str, url_busca: str) -> str:
+    """Converte links de rastreamento do Indeed em links diretos de vaga."""
+    parsed = urlparse(href)
+    job_key = parse_qs(parsed.query).get("jk", [None])[0]
+    base = urlparse(url_busca)
+    if job_key:
+        return f"{base.scheme}://{base.netloc}/viewjob?jk={job_key}"
+    return href
+
+
 async def scroll_incremental(page: Page, rounds: int = SCROLL_ROUNDS) -> None:
     """Scroll progressivo para carregar vagas dinâmicas na página."""
     for _ in range(rounds):
@@ -68,7 +102,7 @@ async def scroll_incremental(page: Page, rounds: int = SCROLL_ROUNDS) -> None:
 
 async def descobrir_vagas(page: Page, url_busca: str) -> list[VagaDescoberta]:
     """
-    Navega para a URL de busca aplicando o filtro das últimas 24h
+    Navega para a URL de busca aplicando o filtro dos últimos 7 dias
     e coleta TODAS as vagas encontradas sem limite.
     """
     portal = detectar_portal(url_busca)
@@ -106,7 +140,7 @@ async def descobrir_vagas(page: Page, url_busca: str) -> list[VagaDescoberta]:
         PORTAL_GUPY: _descobrir_gupy,
         PORTAL_INDEED: _descobrir_indeed,
         PORTAL_INFOJOBS: _descobrir_indeed,
-        PORTAL_CATHO: _descobrir_generico,
+        PORTAL_CATHO: _descobrir_catho,
         PORTAL_VAGAS_COM: _descobrir_vagas_com,
     }
     func = descobridores.get(portal, _descobrir_generico)
@@ -114,6 +148,14 @@ async def descobrir_vagas(page: Page, url_busca: str) -> list[VagaDescoberta]:
 
     # Deduplicação completa sem limite
     urls_unicas = list(dict.fromkeys(urls_encontradas))
+    antes_filtro = len(urls_unicas)
+    urls_unicas = [u for u in urls_unicas if not _url_obviamente_incompativel(u)]
+
+    if len(urls_unicas) != antes_filtro:
+        log.info(
+            "   🧹 Pré-filtro eliminou %d link(s) obviamente incompatível(is)",
+            antes_filtro - len(urls_unicas),
+        )
 
     log.info(
         "   📋 %d vaga(s) do dia capturada(s) nesta busca (varredura ilimitada)",
@@ -169,7 +211,7 @@ async def _descobrir_linkedin(page: Page, url_busca: str) -> list[str]:
     except Exception:
         pass
 
-    # Complementar com paginação profunda via API (24h)
+    # Complementar com paginação profunda via API (7 dias)
     api_urls = await _paginar_linkedin_api(page, url_busca)
     for u in api_urls:
         if u not in cleaned:
@@ -188,7 +230,7 @@ async def _paginar_linkedin_api(page: Page, url_busca: str) -> list[str]:
         params.pop("currentJobId", None)
         params.pop("referralSearchId", None)
         params.pop("origin", None)
-        params["f_TPR"] = ["r86400"]
+        params["f_TPR"] = ["r604800"]
 
         start = 0
         while True:
@@ -263,7 +305,31 @@ async def _descobrir_indeed(page: Page, url_busca: str) -> list[str]:
     )
     base = urlparse(url_busca)
     base_url = f"{base.scheme}://{base.netloc}"
-    return list(dict.fromkeys(urljoin(base_url, h) for h in hrefs))
+    urls = [
+        _normalizar_url_indeed(urljoin(base_url, h), url_busca)
+        for h in hrefs
+    ]
+    return list(dict.fromkeys(urls))
+
+
+async def _descobrir_catho(page: Page, url_busca: str) -> list[str]:
+    """Extrai somente páginas de detalhe da Catho."""
+    hrefs: list[str] = await page.eval_on_selector_all(
+        'a[href*="/vagas/"]',
+        "els => els.map(el => el.href)",
+    )
+    base = urlparse(url_busca)
+    base_url = f"{base.scheme}://{base.netloc}"
+    urls: list[str] = []
+
+    for href in hrefs:
+        absoluto = urljoin(base_url, href)
+        caminho = urlparse(absoluto).path.rstrip("/")
+        # Páginas individuais da Catho possuem ID numérico; categorias não.
+        if re.search(r"/vagas/[^/]+/\d{5,}$", caminho):
+            urls.append(absoluto)
+
+    return list(dict.fromkeys(urls))
 
 
 async def _descobrir_vagas_com(page: Page, url_busca: str) -> list[str]:

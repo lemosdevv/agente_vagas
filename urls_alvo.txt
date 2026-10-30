@@ -1,21 +1,31 @@
-# URLs de BUSCA / LISTAGEM de vagas (uma por linha)
-# O agente filtra e busca SEMPRE as vagas publicadas no dia (últimas 24h).
-# Linhas começando com # são ignoradas.
+# URLs MANUAIS de busca.
+# O agente pesquisa SOMENTE as linhas sem # neste arquivo.
+# Para pausar uma busca, coloque # no início da linha.
+# LinkedIn foi reativado com buscas manuais.
 
-# ── LinkedIn Brasil (desativado temporariamente para teste) ──
-# https://www.linkedin.com/jobs/search/?keywords=desenvolvedor+junior&location=Brasil&geoId=106057199&f_TPR=r86400
+# ============================================================
+# LINKEDIN — buscas manuais (últimos 7 dias)
+# ============================================================
+https://www.linkedin.com/jobs/search/?keywords=estagio&location=Brasil&geoId=106057199&f_TPR=r604800
+https://www.linkedin.com/jobs/search/?keywords=desenvolvedor+junior&location=Brasil&geoId=106057199&f_TPR=r604800
+https://www.linkedin.com/jobs/search/?keywords=devops&location=Brasil&geoId=106057199&f_TPR=r604800
+https://www.linkedin.com/jobs/search/?keywords=backend&location=Brasil&geoId=106057199&f_TPR=r604800
+https://www.linkedin.com/jobs/search/?keywords=fullstack&location=Brasil&geoId=106057199&f_TPR=r604800
+https://www.linkedin.com/jobs/search/?keywords=analista+de+sistemas&location=Brasil&geoId=106057199&f_TPR=r604800
 
-# ── LinkedIn São Paulo (Últimas 24 horas) ──
-# https://www.linkedin.com/jobs/search/?keywords=desenvolvedor+junior&location=S%C3%A3o%20Paulo%2C%20Brasil&geoId=104746682&f_TPR=r86400
+# ============================================================
+# GUPY — buscas manuais
+# ============================================================
 
-# ── Gupy Portal (Brasil) ──
-https://portal.gupy.io/vagas?searchTerm=desenvolvedor%20junior
+# ============================================================
+# INDEED — buscas manuais; fromage=7 limita aos últimos 7 dias
+# ============================================================
 
-# ── Indeed Brasil (Últimas 24 horas: &fromage=1) ──
-https://br.indeed.com/jobs?q=desenvolvedor+junior+backend&l=Brasil&fromage=1
 
-# ── Catho Brasil ──
-https://www.catho.com.br/vagas/desenvolvedor-junior/
+# ============================================================
+# CATHO — buscas manuais
+# ============================================================
 
-# ── InfoJobs Brasil ──
-https://www.infojobs.com.br/vagas-de-emprego-desenvolvedor-junior.aspx
+# ============================================================
+# INFOJOBS — buscas manuais
+# ============================================================

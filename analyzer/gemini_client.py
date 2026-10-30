@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import re
 from google import genai
 
 from config.settings import GEMINI_MODEL, DESCARTE_SENTINELA
@@ -15,6 +16,36 @@ from core.models import DetalhesVaga, ResultadoTriagem
 from .prompts import construir_system_prompt
 
 log = logging.getLogger("agente_vagas.analyzer")
+
+
+_TITULO_OBVIAMENTE_INCOMPATIVEL = (
+    "atendente de restaurante",
+    "atendente de lanchonete",
+    "operador de caixa",
+    "auxiliar de cozinha",
+    "auxiliar de serviços gerais",
+    "garçom",
+    "garcon",
+    "cozinheiro",
+    "promotor de vendas",
+    "consultor de vendas",
+    "vendedor",
+    "recepcionista",
+    "motorista",
+)
+
+
+def _titulo_obviamente_incompativel(texto: str) -> str | None:
+    """Retorna o motivo apenas quando o título indica cargo não técnico."""
+    match = re.search(r"TÍTULO:\s*(.+)", texto, flags=re.IGNORECASE)
+    if not match:
+        return None
+
+    titulo = " ".join(match.group(1).split()).lower()
+    for termo in _TITULO_OBVIAMENTE_INCOMPATIVEL:
+        if termo in titulo:
+            return termo
+    return None
 
 
 class GeminiAnalyzer:
@@ -32,6 +63,22 @@ class GeminiAnalyzer:
         log.info("   🤖 Avaliando com Gemini 3.6 Flash: %s", vaga.url)
 
         texto_truncado = vaga.texto_completo[:15_000]
+
+        motivo_pre_filtro = _titulo_obviamente_incompativel(texto_truncado)
+        if motivo_pre_filtro:
+            log.info(
+                "      ❌ Pré-filtro: cargo obviamente incompatível (%s)",
+                motivo_pre_filtro,
+            )
+            return ResultadoTriagem(
+                url=vaga.url,
+                aprovada=False,
+                relatorio=(
+                    f"{DESCARTE_SENTINELA}: cargo incompatível "
+                    f"({motivo_pre_filtro})"
+                ),
+            )
+
         user_prompt = (
             f"Texto extraído da página da vaga ({vaga.url}):\n\n"
             f"---\n{texto_truncado}\n---"
@@ -54,7 +101,7 @@ class GeminiAnalyzer:
             )
 
             if DESCARTE_SENTINELA in resultado_texto:
-                log.info("      ❌ Vaga descartada (incompatível ou mais antiga que 24h).")
+                log.info("      ❌ Vaga descartada (incompatível ou mais antiga que 7 dias).")
                 return ResultadoTriagem(
                     url=vaga.url,
                     aprovada=False,

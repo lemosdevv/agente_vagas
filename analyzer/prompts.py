@@ -22,9 +22,9 @@ def construir_system_prompt(curriculo: str) -> str:
 
         CRITÉRIOS DE AVALIAÇÃO OBRIGATÓRIOS (FUNIL ELIMINATÓRIO):
 
-        1. TEMPO DE PUBLICAÇÃO (REGRA DO DIA / ÚLTIMAS 24 HORAS - CRÍTICO):
-           - A vaga DEVE ter sido publicada no dia / nas últimas 24 horas (ex: "há X minutos", "há X horas", "publicada hoje", "há 1 dia", "hours ago", "recently").
-           - Se o texto indicar explicitamente que a vaga tem 2 dias ou mais de postada (ex: "há 2 dias", "há 3 dias", "há 1 semana", "há 1 mês"), você DEVE DESCARTAR: DESCARTAR_VAGA.
+        1. TEMPO DE PUBLICAÇÃO (ÚLTIMOS 7 DIAS - CRÍTICO):
+           - A vaga DEVE ter sido publicada nos últimos 7 dias (ex: "há X minutos", "há X horas", "hoje", "há 1 dia", "há 3 dias", "há 6 dias", "recently").
+           - Se o texto indicar explicitamente que a vaga tem 8 dias ou mais, 1 semana ou mais completa, ou 1 mês ou mais, você DEVE DESCARTAR: DESCARTAR_VAGA.
 
         2. GEOLOCALIZAÇÃO E MODALIDADE:
            - APENAS VAGAS NO BRASIL: Vagas internacionais/gringas (EUA, Europa, Canadá, etc.) DEVEM SER SUMARIAMENTE DESCARTADAS.
@@ -42,6 +42,8 @@ def construir_system_prompt(curriculo: str) -> str:
         4. ÁREA DE ATUAÇÃO E STACK:
            - A vaga deve ser em: Backend, Full Stack, Automação de Dados/Processos, Suporte de Infraestrutura ou DevOps.
            - Deve possuir interseção razoável com as tecnologias do candidato (Java, C#, .NET, Python, Node.js, React, TypeScript/JavaScript, SQL, AD, etc.).
+           - Cargos de atendimento, restaurante, varejo, vendas, caixa, recepção, cozinha, logística, manutenção não técnica ou serviços gerais DEVEM SER DESCARTADOS, mesmo que a busca tenha retornado a vaga ou a empresa também contrate profissionais de tecnologia.
+           - O título e as responsabilidades precisam demonstrar trabalho real com desenvolvimento, sistemas, dados, automação, infraestrutura ou suporte técnico. Não aprove uma vaga apenas porque contém uma palavra técnica isolada.
 
         5. IDIOMA DA VAGA E EXIGÊNCIA DE INGLÊS:
            - Se a descrição da vaga estiver predominantemente em inglês ou exigir que o trabalho seja realizado em inglês, DEVEMOS DESCARTAR: DESCARTAR_VAGA.
@@ -61,7 +63,7 @@ def construir_system_prompt(curriculo: str) -> str:
            NÍVEL: <Estágio / Júnior>
            ÁREA: <Backend / Full Stack / Automação / DevOps / Suporte>
            MATCH TECNOLÓGICO: <listar tecnologias em comum>
-           JUSTIFICATIVA DE COMPATIBILIDADE: <2-4 frases explicando o match técnico, a adequação de modalidade/região e que foi postada no dia>
+           JUSTIFICATIVA DE COMPATIBILIDADE: <2-4 frases explicando o match técnico, a adequação de modalidade/região e que foi publicada nos últimos 7 dias>
            RASCUNHO DOS DADOS A PREENCHER: <campos típicos com sugestões de resposta para o Mateus>
            LINK DIRETO: <será adicionado automaticamente>
 
@@ -70,5 +72,6 @@ def construir_system_prompt(curriculo: str) -> str:
            responda EXATAMENTE com a string:
            DESCARTAR_VAGA
 
-        Seja estritamente objetivo. Não inclua saudações nem texto fora do padrão.
+        Em caso de dúvida sobre a compatibilidade, descarte a vaga. Seja estritamente objetivo.
+        Não inclua saudações nem texto fora do padrão.
     """)

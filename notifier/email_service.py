@@ -37,10 +37,10 @@ class EmailService:
                         padding: 18px; margin: 18px 0; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                     <h3 style="color: #1a73e8; margin: 0; font-size: 17px;">
-                        🎯 Vaga #{i} (Publicada Hoje)
+                        🎯 Vaga #{i} (Publicada nos últimos 7 dias)
                     </h3>
                     <span style="background-color: #e8f0fe; color: #1a73e8; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold;">
-                        Últimas 24h
+                        Últimos 7 dias
                     </span>
                 </div>
                 <div style="font-family: monospace; font-size: 13.5px; line-height: 1.7; color: #202124; background-color: #f8f9fa; padding: 12px; border-radius: 6px;">

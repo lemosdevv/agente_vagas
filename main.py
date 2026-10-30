@@ -7,9 +7,11 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
+from datetime import datetime, timezone
 
-from config.settings import carregar_configuracao, DELAY_ENTRE_PAGINAS
+from config.settings import carregar_configuracao, DELAY_ENTRE_PAGINAS, ENVIADAS_FILE
 from core.models import VagaDescoberta, ResultadoTriagem
 from scrapers import criar_contexto_navegador, descobrir_vagas, raspar_detalhe_vaga
 from analyzer import GeminiAnalyzer
@@ -23,10 +25,37 @@ logging.basicConfig(
 log = logging.getLogger("agente_vagas")
 
 
+def carregar_urls_enviadas() -> set[str]:
+    """Carrega URLs já incluídas em e-mails enviados anteriormente."""
+    if not ENVIADAS_FILE.exists():
+        return set()
+    try:
+        dados = json.loads(ENVIADAS_FILE.read_text(encoding="utf-8"))
+        if isinstance(dados, list):
+            return {str(url) for url in dados}
+        if isinstance(dados, dict):
+            return {str(url) for url in dados.get("urls", [])}
+    except (OSError, json.JSONDecodeError) as exc:
+        log.warning("Não foi possível carregar o histórico de enviadas: %s", exc)
+    return set()
+
+
+def salvar_urls_enviadas(urls: set[str]) -> None:
+    """Persiste URLs enviadas com sucesso para evitar duplicidade futura."""
+    payload = {
+        "atualizado_em": datetime.now(timezone.utc).isoformat(),
+        "urls": sorted(urls),
+    }
+    ENVIADAS_FILE.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+
+
 async def executar_pipeline() -> None:
-    """Executa o ciclo completo: Descoberta (24h) → Raspagem → Triagem → Notificação."""
+    """Executa o ciclo: Descoberta (7 dias) → Raspagem → Triagem → Notificação."""
     log.info("=" * 60)
-    log.info("  🤖 Agente Autônomo de Vagas — Varredura Diária (24h)")
+    log.info("  🤖 Agente Autônomo de Vagas — Varredura dos Últimos 7 Dias")
     log.info("=" * 60)
 
     # 1. Configurações e Serviços
@@ -36,12 +65,13 @@ async def executar_pipeline() -> None:
 
     todas_vagas: list[VagaDescoberta] = []
     urls_ja_vistas: set[str] = set()
+    urls_enviadas = carregar_urls_enviadas()
 
     # 2. Ciclo de Scraping & Análise
     async with criar_contexto_navegador() as context:
         # FASE 1: Descoberta de Vagas do Dia
         log.info("─" * 60)
-        log.info("FASE 1: DESCOBERTA DE VAGAS DO DIA (ÚLTIMAS 24H)")
+        log.info("FASE 1: DESCOBERTA DE VAGAS (ÚLTIMOS 7 DIAS)")
         log.info("─" * 60)
 
         for url_busca in cfg.urls_busca:
@@ -49,6 +79,9 @@ async def executar_pipeline() -> None:
             try:
                 vagas = await descobrir_vagas(page, url_busca)
                 for v in vagas:
+                    if v.url in urls_enviadas:
+                        log.info("   ↩ Vaga já enviada anteriormente; ignorando: %s", v.url)
+                        continue
                     if v.url not in urls_ja_vistas:
                         urls_ja_vistas.add(v.url)
                         todas_vagas.append(v)
@@ -64,7 +97,7 @@ async def executar_pipeline() -> None:
         )
 
         if not todas_vagas:
-            log.warning("Nenhuma vaga recente encontrada nas últimas 24 horas.")
+            log.warning("Nenhuma vaga nova encontrada nos últimos 7 dias.")
             return
 
         # FASE 2: Raspagem de Detalhe e Triagem com IA
@@ -107,20 +140,24 @@ async def executar_pipeline() -> None:
     log.info("FASE 3: RESULTADO FINAL & NOTIFICAÇÃO")
     log.info("─" * 60)
     log.info(
-        "📊 %d aprovada(s) do dia | %d descartada(s) | %d total avaliada(s)",
+        "📊 %d aprovada(s) | %d descartada(s) | %d total avaliada(s)",
         len(aprovadas),
         descartadas,
         len(resultados),
     )
 
     if aprovadas:
-        notifier.enviar_relatorio(
+        email_enviado = notifier.enviar_relatorio(
             destinatario=cfg.email,
-            assunto=f"🎯 Agente de Vagas — {len(aprovadas)} vaga(s) de HOJE compatíveis",
+            assunto=f"🎯 Agente de Vagas — {len(aprovadas)} vaga(s) compatíveis dos últimos 7 dias",
             vagas_aprovadas=aprovadas,
         )
+        if email_enviado:
+            urls_enviadas.update(v.url for v in aprovadas)
+            salvar_urls_enviadas(urls_enviadas)
+            log.info("   💾 Histórico atualizado: %d vaga(s) registradas", len(urls_enviadas))
     else:
-        log.info("📭 Nenhuma vaga compatível das últimas 24h encontrada. E-mail não disparado.")
+        log.info("📭 Nenhuma vaga compatível dos últimos 7 dias encontrada. E-mail não disparado.")
 
     log.info("✅ Varredura finalizada com sucesso.")
 
