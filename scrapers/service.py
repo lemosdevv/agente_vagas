@@ -15,6 +15,7 @@ from config.settings import (
     PORTAL_GUPY,
     PORTAL_INDEED,
     PORTAL_INFOJOBS,
+    PORTAL_CATHO,
     PORTAL_VAGAS_COM,
     PAGE_LOAD_TIMEOUT_MS,
 )
@@ -34,6 +35,7 @@ _EXTRATORES = {
     PORTAL_GUPY: GupyExtractor(),
     PORTAL_INDEED: IndeedExtractor(),
     PORTAL_INFOJOBS: IndeedExtractor(),
+    PORTAL_CATHO: GenericExtractor(),
     PORTAL_VAGAS_COM: GenericExtractor(),
 }
 _EXTRATOR_DEFAULT = GenericExtractor()

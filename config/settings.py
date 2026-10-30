@@ -31,7 +31,7 @@ if ENV_FILE.exists():
 
 # Constantes de Triagem & IA
 DESCARTE_SENTINELA: Final[str] = "DESCARTAR_VAGA"
-GEMINI_MODEL: Final[str] = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
+GEMINI_MODEL: Final[str] = os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite")
 
 # Constantes de Rede e SMTP
 SMTP_HOST: Final[str] = "smtp.gmail.com"
@@ -54,6 +54,7 @@ PORTAL_LINKEDIN: Final[str] = "linkedin"
 PORTAL_GUPY: Final[str] = "gupy"
 PORTAL_INDEED: Final[str] = "indeed"
 PORTAL_INFOJOBS: Final[str] = "infojobs"
+PORTAL_CATHO: Final[str] = "catho"
 PORTAL_VAGAS_COM: Final[str] = "vagas.com"
 PORTAL_GENERICO: Final[str] = "generico"
 

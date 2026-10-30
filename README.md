@@ -16,7 +16,8 @@ Agente de IA em Python que realiza **varreduras diárias completas e sem limites
    - **Fora de SP:** Aceita **apenas se for 100% Remota**.
 4. **Nível:** Estágio e Júnior.
 5. **Áreas:** Backend, Full Stack, Automação de Dados, DevOps, Suporte Infra.
-6. **Relatório Consolidado por E-mail:**
+6. **Idioma:** Descarta vagas com descrição predominantemente em inglês ou exigência de inglês avançado/fluente. Aceita inglês técnico para leitura de documentação e termos da área.
+7. **Relatório Consolidado por E-mail:**
    - Todas as vagas aprovadas do dia enviadas via Gmail SSL com botão direto de 1 clique para candidatura.
 
 ---

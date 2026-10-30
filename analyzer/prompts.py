@@ -43,7 +43,14 @@ def construir_system_prompt(curriculo: str) -> str:
            - A vaga deve ser em: Backend, Full Stack, Automação de Dados/Processos, Suporte de Infraestrutura ou DevOps.
            - Deve possuir interseção razoável com as tecnologias do candidato (Java, C#, .NET, Python, Node.js, React, TypeScript/JavaScript, SQL, AD, etc.).
 
-        5. SE A VAGA FOR COMPATÍVEL (atende a TODOS os critérios 1, 2, 3 e 4),
+        5. IDIOMA DA VAGA E EXIGÊNCIA DE INGLÊS:
+           - Se a descrição da vaga estiver predominantemente em inglês ou exigir que o trabalho seja realizado em inglês, DEVEMOS DESCARTAR: DESCARTAR_VAGA.
+           - Se exigir inglês avançado, fluente, profissional, conversação avançada, nível C1/C2, fluência para reuniões ou comunicação diária com equipes/clientes internacionais, DEVEMOS DESCARTAR: DESCARTAR_VAGA.
+           - Inglês técnico do candidato é aceitável: leitura de documentação, leitura técnica, termos técnicos da área, inglês básico/intermediário ou inglês apenas como diferencial NÃO devem causar descarte por si só.
+           - Não confunda palavras técnicas em inglês (ex: backend, software, cloud, deployment, framework) com uma descrição predominantemente em inglês.
+           - Se o nível de inglês não estiver claro, não invente uma exigência avançada; avalie apenas o que estiver explicitamente indicado.
+
+        6. SE A VAGA FOR COMPATÍVEL (atende a TODOS os critérios 1, 2, 3, 4 e 5),
            responda EXATAMENTE neste formato (sem markdown, sem blocos de código):
 
            TÍTULO DA VAGA: <título>
@@ -58,7 +65,7 @@ def construir_system_prompt(curriculo: str) -> str:
            RASCUNHO DOS DADOS A PREENCHER: <campos típicos com sugestões de resposta para o Mateus>
            LINK DIRETO: <será adicionado automaticamente>
 
-        6. SE A VAGA NÃO FOR COMPATÍVEL com qualquer um dos critérios acima
+        7. SE A VAGA NÃO FOR COMPATÍVEL com qualquer um dos critérios acima
            OU se o texto for irrelevante / erro / ilegível,
            responda EXATAMENTE com a string:
            DESCARTAR_VAGA

@@ -18,6 +18,7 @@ from config.settings import (
     PORTAL_GUPY,
     PORTAL_INDEED,
     PORTAL_INFOJOBS,
+    PORTAL_CATHO,
     PORTAL_VAGAS_COM,
     PORTAL_GENERICO,
     PAGE_LOAD_TIMEOUT_MS,
@@ -42,6 +43,8 @@ def detectar_portal(url: str) -> str:
         return PORTAL_INDEED
     if "infojobs.com" in domain:
         return PORTAL_INFOJOBS
+    if "catho.com" in domain:
+        return PORTAL_CATHO
     if "vagas.com" in domain:
         return PORTAL_VAGAS_COM
     return PORTAL_GENERICO
@@ -77,18 +80,25 @@ async def descobrir_vagas(page: Page, url_busca: str) -> list[VagaDescoberta]:
     log.info("🔍 Varrendo vagas DO DIA em [%s]: %s", portal.upper(), url_navegacao)
 
     try:
+        log.info("   ⏳ Iniciando carregamento da página...")
         await page.goto(
             url_navegacao,
             timeout=PAGE_LOAD_TIMEOUT_MS,
             wait_until="domcontentloaded",
         )
+        log.info("   ✔ Página carregada. URL atual: %s", page.url)
         await page.wait_for_timeout(2500)
         await fechar_popups(page)
     except PlaywrightTimeout:
         log.error("   ✖ Timeout ao carregar página de busca: %s", url_navegacao)
         return []
     except Exception as exc:
-        log.error("   ✖ Erro ao navegar para %s: %s", url_navegacao, exc)
+        log.error(
+            "   ✖ Erro ao navegar para %s: %s | URL observada: %s",
+            url_navegacao,
+            exc,
+            page.url,
+        )
         return []
 
     descobridores = {
@@ -96,6 +106,7 @@ async def descobrir_vagas(page: Page, url_busca: str) -> list[VagaDescoberta]:
         PORTAL_GUPY: _descobrir_gupy,
         PORTAL_INDEED: _descobrir_indeed,
         PORTAL_INFOJOBS: _descobrir_indeed,
+        PORTAL_CATHO: _descobrir_generico,
         PORTAL_VAGAS_COM: _descobrir_vagas_com,
     }
     func = descobridores.get(portal, _descobrir_generico)

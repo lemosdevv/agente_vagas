@@ -2,14 +2,20 @@
 # O agente filtra e busca SEMPRE as vagas publicadas no dia (últimas 24h).
 # Linhas começando com # são ignoradas.
 
-# ── LinkedIn Brasil (Vagas Júnior / Estágio publicadas nas ÚLTIMAS 24 HORAS: f_TPR=r86400) ──
-https://www.linkedin.com/jobs/search/?keywords=desenvolvedor+junior&location=Brasil&geoId=106057199&f_TPR=r86400
+# ── LinkedIn Brasil (desativado temporariamente para teste) ──
+# https://www.linkedin.com/jobs/search/?keywords=desenvolvedor+junior&location=Brasil&geoId=106057199&f_TPR=r86400
 
 # ── LinkedIn São Paulo (Últimas 24 horas) ──
 # https://www.linkedin.com/jobs/search/?keywords=desenvolvedor+junior&location=S%C3%A3o%20Paulo%2C%20Brasil&geoId=104746682&f_TPR=r86400
 
 # ── Gupy Portal (Brasil) ──
-# https://portal.gupy.io/vagas?searchTerm=desenvolvedor+junior
+https://portal.gupy.io/vagas?searchTerm=desenvolvedor%20junior
 
 # ── Indeed Brasil (Últimas 24 horas: &fromage=1) ──
-# https://br.indeed.com/jobs?q=desenvolvedor+junior+backend&l=Brasil&fromage=1
+https://br.indeed.com/jobs?q=desenvolvedor+junior+backend&l=Brasil&fromage=1
+
+# ── Catho Brasil ──
+https://www.catho.com.br/vagas/desenvolvedor-junior/
+
+# ── InfoJobs Brasil ──
+https://www.infojobs.com.br/vagas-de-emprego-desenvolvedor-junior.aspx

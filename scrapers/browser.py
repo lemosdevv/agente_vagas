@@ -49,12 +49,6 @@ async def criar_contexto_navegador() -> AsyncGenerator[BrowserContext, None]:
             "locale": "pt-BR",
             "viewport": {"width": 1366, "height": 768},
             "java_script_enabled": True,
-            "extra_http_headers": {
-                "Accept-Language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7",
-                "Sec-Ch-Ua": '"Chromium";v="129", "Not=A?Brand";v="8"',
-                "Sec-Ch-Ua-Mobile": "?0",
-                "Sec-Ch-Ua-Platform": '"Windows"',
-            },
         }
 
         context: BrowserContext = await browser.new_context(**context_kwargs)

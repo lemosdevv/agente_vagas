@@ -29,7 +29,7 @@ class GeminiAnalyzer:
         """
         Submete o texto da vaga ao Gemini e retorna o ResultadoTriagem estruturado.
         """
-        log.info("   🤖 Avaliando com Gemini 2.0 Flash: %s", vaga.url)
+        log.info("   🤖 Avaliando com Gemini 3.6 Flash: %s", vaga.url)
 
         texto_truncado = vaga.texto_completo[:15_000]
         user_prompt = (
